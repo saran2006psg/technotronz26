@@ -5,8 +5,8 @@ import type React from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { FloatingParticles } from "@/components/floating-particles"
-import { ProfileAvatar } from "@/components/profile-avatar"
 import { useAuth } from "@/hooks/use-auth"
+import { useState, useEffect } from "react"
 
 const workshops = [
   {
@@ -144,20 +144,17 @@ function EventCard({
   title,
   description,
   label,
-  showRegister = false,
+  isRegistered,
 }: {
   id: string
   title: string
   description: string
   label: string
-  showRegister?: boolean
+  isRegistered: boolean
 }) {
   const router = useRouter()
 
-  const handleCardClick = (e: React.MouseEvent) => {
-    if ((e.target as HTMLElement).closest("[data-register-btn]")) {
-      return
-    }
+  const handleCardClick = () => {
     router.push(`/events/${id}`)
   }
 
@@ -182,16 +179,18 @@ function EventCard({
           <div className="absolute bottom-2 left-2 w-3 h-3 border-l border-b border-red-600/60" />
           <div className="absolute bottom-2 right-2 w-3 h-3 border-r border-b border-red-600/60" />
 
-          {/* Neon glowing label with flicker animation */}
-          <div
-            className="absolute -top-1 -right-1 px-2 py-0.5 font-mono text-[10px] sm:text-xs tracking-wider text-red-400 rotate-2"
-            style={{
-              textShadow:
-                "0 0 5px rgba(220, 38, 38, 0.8), 0 0 10px rgba(220, 38, 38, 0.6), 0 0 20px rgba(220, 38, 38, 0.4)",
-              animation: "labelFlicker 3s infinite",
-            }}
-          >
-            {label}
+          {/* Label Badge */}
+          <div className="absolute -top-1 -right-1">
+            <div
+              className="px-2 py-0.5 font-mono text-[10px] sm:text-xs tracking-wider text-red-400 rotate-2"
+              style={{
+                textShadow:
+                  "0 0 5px rgba(220, 38, 38, 0.8), 0 0 10px rgba(220, 38, 38, 0.6), 0 0 20px rgba(220, 38, 38, 0.4)",
+                animation: "labelFlicker 3s infinite",
+              }}
+            >
+              {label}
+            </div>
           </div>
 
           {/* Content */}
@@ -200,15 +199,10 @@ function EventCard({
           </h3>
           <p className="text-gray-400 text-xs sm:text-sm leading-relaxed mb-4">{description}</p>
 
-          {showRegister && (
-            <Link
-              href="/registration"
-              data-register-btn
-              className="relative inline-block mt-2 px-4 sm:px-6 py-2 bg-transparent border border-red-600 text-red-500 text-xs sm:text-sm font-mono tracking-wider overflow-hidden transition-all duration-300 hover:bg-red-600/20 hover:shadow-[0_0_20px_rgba(220,38,38,0.6)] hover:text-red-400 z-10"
-            >
-              <span className="relative z-10">REGISTER</span>
-              <div className="absolute inset-0 bg-red-600/10 opacity-0 hover:opacity-100 transition-opacity" />
-            </Link>
+          {isRegistered && (
+            <div className="mt-2 px-4 sm:px-6 py-2 bg-green-950/20 border border-green-900/50 text-green-400 text-xs sm:text-sm font-mono tracking-wider">
+              REGISTERED
+            </div>
           )}
 
           {/* Hover glow overlay */}
@@ -220,7 +214,70 @@ function EventCard({
 }
 
 export default function EventsPage() {
-  const { isLoggedIn, login } = useAuth()
+  const { isLoggedIn, login, user } = useAuth()
+  const [userData, setUserData] = useState<any>(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    async function fetchUserData() {
+      if (isLoggedIn) {
+        try {
+          const response = await fetch("/api/user/me")
+          if (response.ok) {
+            const data = await response.json()
+            setUserData(data)
+          }
+        } catch (error) {
+          console.error("Error fetching user data:", error)
+        } finally {
+          setLoading(false)
+        }
+      } else {
+        setLoading(false)
+      }
+    }
+
+    fetchUserData()
+  }, [isLoggedIn])
+
+  const handleRegisterEvent = async (eventId: string) => {
+    try {
+      const response = await fetch("/api/user/register-event", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ eventId }),
+      })
+
+      const result = await response.json()
+
+      if (!response.ok) {
+        alert(result.error || "Registration failed")
+        return
+      }
+
+      // Refresh user data
+      const userResponse = await fetch("/api/user/me")
+      if (userResponse.ok) {
+        const data = await userResponse.json()
+        setUserData(data)
+      }
+
+      alert("Successfully registered for event!")
+    } catch (error) {
+      console.error("Error registering for event:", error)
+      alert("An error occurred while registering")
+    }
+  }
+
+  if (loading) {
+    return (
+      <main className="relative min-h-screen bg-black overflow-hidden flex items-center justify-center">
+        <div className="text-red-500 font-mono">Loading...</div>
+      </main>
+    )
+  }
 
   if (!isLoggedIn) {
     return (
@@ -268,7 +325,6 @@ export default function EventsPage() {
 
   return (
     <main className="relative min-h-screen bg-black overflow-hidden">
-      <ProfileAvatar />
 
       {/* Background layers */}
       <div className="absolute inset-0 bg-gradient-to-b from-black via-red-950/20 to-black" />
@@ -364,7 +420,10 @@ export default function EventsPage() {
                   className="animate-content-fade-in opacity-0"
                   style={{ animationDelay: `${0.5 + index * 0.1}s`, animationFillMode: "forwards" }}
                 >
-                  <EventCard {...event} />
+                  <EventCard
+                    {...event}
+                    isRegistered={userData?.eventsRegistered?.includes(event.id) || false}
+                  />
                 </div>
               ))}
             </div>

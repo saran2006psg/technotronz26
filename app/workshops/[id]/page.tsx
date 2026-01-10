@@ -3,6 +3,7 @@
 import Link from "next/link"
 import { useAuth } from "@/hooks/use-auth"
 import { FloatingParticles } from "@/components/floating-particles"
+import { useState, useEffect } from "react"
 
 // Workshop data mapping
 const workshopData: Record<
@@ -117,6 +118,79 @@ const defaultWorkshop = {
 export default function WorkshopDetailsPage({ params }: { params: { id: string } }) {
   const { isLoggedIn, login } = useAuth()
   const workshop = workshopData[params.id] || defaultWorkshop
+  const [userData, setUserData] = useState<any>(null)
+  const [loading, setLoading] = useState(true)
+  const [isRegistering, setIsRegistering] = useState(false)
+
+  useEffect(() => {
+    async function fetchUserData() {
+      if (isLoggedIn) {
+        try {
+          const response = await fetch("/api/user/me")
+          if (response.ok) {
+            const data = await response.json()
+            setUserData(data)
+          }
+        } catch (error) {
+          console.error("Error fetching user data:", error)
+        } finally {
+          setLoading(false)
+        }
+      } else {
+        setLoading(false)
+      }
+    }
+
+    fetchUserData()
+  }, [isLoggedIn])
+
+  const workshopId = params.id.toUpperCase()
+  const isRegistered = userData?.workshopsRegistered?.includes(workshopId) || false
+  const paymentStatus = userData?.workshopPayments?.[workshopId] || "NOT_PAID"
+  const isPaid = paymentStatus === "PAID"
+
+  const handleRegister = async () => {
+    setIsRegistering(true)
+    try {
+      const response = await fetch("/api/user/register-workshop", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ workshopId }),
+      })
+
+      const result = await response.json()
+
+      if (!response.ok) {
+        alert(result.error || "Registration failed")
+        return
+      }
+
+      // Refresh user data
+      const userResponse = await fetch("/api/user/me")
+      if (userResponse.ok) {
+        const data = await userResponse.json()
+        setUserData(data)
+      }
+
+      alert("Successfully registered for workshop!")
+    } catch (error) {
+      console.error("Error registering for workshop:", error)
+      alert("An error occurred while registering")
+    } finally {
+      setIsRegistering(false)
+    }
+  }
+
+  if (loading) {
+    return (
+      <main className="relative min-h-screen bg-black flex items-center justify-center p-4">
+        <FloatingParticles />
+        <div className="text-red-500 font-mono">Loading...</div>
+      </main>
+    )
+  }
 
   if (!isLoggedIn) {
     return (
@@ -373,22 +447,57 @@ export default function WorkshopDetailsPage({ params }: { params: { id: string }
                 </div>
               </section>
 
+              {/* Payment Status */}
+              {isLoggedIn && (
+                <div
+                  className="pt-4 sm:pt-6 animate-section-fade-in opacity-0"
+                  style={{ animationDelay: "1.3s", animationFillMode: "forwards" }}
+                >
+                  <div className="bg-red-950/20 border border-red-900/40 p-4 rounded-sm">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-gray-300 text-sm font-mono">Payment Status</span>
+                      <span
+                        className={`text-xs font-mono px-3 py-1 rounded-full ${
+                          isPaid
+                            ? "bg-green-900/30 text-green-400 border border-green-600/40"
+                            : "bg-red-900/30 text-red-400 border border-red-600/40"
+                        }`}
+                      >
+                        {isPaid ? "PAID" : "NOT PAID"}
+                      </span>
+                    </div>
+                    {isRegistered && (
+                      <p className="text-green-400 text-xs font-mono mt-2">✓ Registered for this workshop</p>
+                    )}
+                  </div>
+                </div>
+              )}
+
               {/* Register Now Button */}
               <div
                 className="pt-4 sm:pt-6 text-center animate-section-fade-in opacity-0"
                 style={{ animationDelay: "1.4s", animationFillMode: "forwards" }}
               >
-                <Link
-                  href="/registration"
-                  className="relative inline-block px-8 sm:px-12 py-3 sm:py-4 bg-transparent border-2 border-red-600 text-red-500 text-sm sm:text-base font-mono tracking-widest overflow-hidden transition-all duration-300 hover:bg-red-600/20 hover:text-red-400 hover:shadow-[0_0_30px_rgba(220,38,38,0.6)] group animate-pulse-glow-subtle"
-                  style={{
-                    boxShadow: "0 0 20px rgba(220, 38, 38, 0.4), inset 0 0 20px rgba(220, 38, 38, 0.1)",
-                  }}
-                >
-                  <span className="relative z-10 group-hover:animate-glitch-1">REGISTER NOW</span>
-                  {/* Ripple effect on hover */}
-                  <div className="absolute inset-0 bg-red-600/10 scale-0 group-hover:scale-100 transition-transform duration-500 rounded-sm" />
-                </Link>
+                {isRegistered ? (
+                  <div className="relative inline-block px-8 sm:px-12 py-3 sm:py-4 bg-green-950/20 border-2 border-green-600 text-green-400 text-sm sm:text-base font-mono tracking-widest">
+                    REGISTERED
+                  </div>
+                ) : (
+                  <button
+                    onClick={handleRegister}
+                    disabled={isRegistering}
+                    className="relative inline-block px-8 sm:px-12 py-3 sm:py-4 bg-transparent border-2 border-red-600 text-red-500 text-sm sm:text-base font-mono tracking-widest overflow-hidden transition-all duration-300 hover:bg-red-600/20 hover:text-red-400 hover:shadow-[0_0_30px_rgba(220,38,38,0.6)] group animate-pulse-glow-subtle disabled:opacity-50 disabled:cursor-not-allowed"
+                    style={{
+                      boxShadow: "0 0 20px rgba(220, 38, 38, 0.4), inset 0 0 20px rgba(220, 38, 38, 0.1)",
+                    }}
+                  >
+                    <span className="relative z-10 group-hover:animate-glitch-1">
+                      {isRegistering ? "REGISTERING..." : "REGISTER & PAY"}
+                    </span>
+                    {/* Ripple effect on hover */}
+                    <div className="absolute inset-0 bg-red-600/10 scale-0 group-hover:scale-100 transition-transform duration-500 rounded-sm" />
+                  </button>
+                )}
               </div>
             </div>
           </div>

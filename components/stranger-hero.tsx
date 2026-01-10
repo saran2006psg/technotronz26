@@ -115,21 +115,21 @@ export default function StrangerHero() {
         <div className="relative mb-6 sm:mb-12 flex flex-col items-center w-full">
           <div className="relative w-full max-w-sm sm:max-w-3xl lg:max-w-5xl mx-auto">
             <span
-              className="absolute inset-0 animate-glitch-1 text-[2.5rem] xs:text-4xl sm:text-6xl md:text-7xl lg:text-[7rem] xl:text-[9rem] font-bold font-serif tracking-widest text-red-600 opacity-60 blur-[2px] select-none leading-none"
+              className="absolute inset-0 animate-glitch-1 text-[3rem] sm:text-[4rem] md:text-[5rem] lg:text-[6rem] font-bold font-serif tracking-[0.15em] text-red-600 opacity-60 blur-[2px] select-none leading-none"
               aria-hidden="true"
             >
               TECHNOTRONZ
             </span>
             <span
-              className="absolute inset-0 animate-glitch-2 text-[2.5rem] xs:text-4xl sm:text-6xl md:text-7xl lg:text-[7rem] xl:text-[9rem] font-bold font-serif tracking-widest text-cyan-600 opacity-40 blur-[2px] select-none leading-none"
+              className="absolute inset-0 animate-glitch-2 text-[3rem] sm:text-[4rem] md:text-[5rem] lg:text-[6rem] font-bold font-serif tracking-[0.15em] text-cyan-600 opacity-40 blur-[2px] select-none leading-none"
               aria-hidden="true"
             >
               TECHNOTRONZ
             </span>
 
-            <span className="relative block text-[2.5rem] xs:text-4xl sm:text-6xl md:text-7xl lg:text-[7rem] xl:text-[9rem] font-bold font-serif tracking-widest text-transparent bg-clip-text bg-gradient-to-b from-red-500 via-red-600 to-red-800 animate-flicker drop-shadow-[0_0_20px_rgba(220,38,38,0.9)] leading-none py-2">
+            <h1 className="relative block text-[3rem] sm:text-[4rem] md:text-[5rem] lg:text-[6rem] font-bold font-serif tracking-[0.15em] text-transparent bg-clip-text bg-gradient-to-b from-red-500 via-red-600 to-red-800 animate-flicker drop-shadow-[0_0_20px_rgba(220,38,38,0.9)] leading-none py-2">
               TECHNOTRONZ
-            </span>
+            </h1>
           </div>
 
           <p className="mt-6 sm:mt-10 md:mt-12 text-[9px] sm:text-sm md:text-base lg:text-lg font-light tracking-[0.2em] sm:tracking-[0.5em] text-red-100/90 uppercase drop-shadow-[0_0_12px_rgba(255,255,255,0.4)] px-4 max-w-2xl mx-auto text-balance">

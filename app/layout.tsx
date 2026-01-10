@@ -1,13 +1,11 @@
 import type React from "react"
 import type { Metadata } from "next"
-import { Geist, Geist_Mono, Cinzel } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
 import "./globals.css"
-import { ProfileAvatar } from "@/components/profile-avatar"
+import { ProfileDropdown } from "@/components/profile-dropdown"
+import { Providers } from "@/components/providers"
 
-const _geist = Geist({ subsets: ["latin"] })
-const _geistMono = Geist_Mono({ subsets: ["latin"] })
-const _cinzel = Cinzel({ subsets: ["latin"], weight: ["400", "700", "900"] })
+// Fonts are loaded via CSS (e.g. Google Fonts) to avoid next/font/turbopack issues
 
 export const metadata: Metadata = {
   title: "TECHNOTRONZ 2025 | Enter the Upside Down",
@@ -40,9 +38,11 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark">
       <body className={`font-sans antialiased bg-black`}>
-        <ProfileAvatar />
-        {children}
-        <Analytics />
+        <Providers>
+          <ProfileDropdown />
+          {children}
+          <Analytics />
+        </Providers>
       </body>
     </html>
   )

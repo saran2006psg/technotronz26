@@ -2,24 +2,77 @@
 
 import { useAuth } from "@/hooks/use-auth"
 import { FloatingParticles } from "@/components/floating-particles"
-import { ProfileAvatar } from "@/components/profile-avatar"
 import { Copy, CheckCircle, Shield, CreditCard, User } from "lucide-react"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 
+interface UserData {
+  id: string
+  name: string
+  email: string
+  tzId: string
+  collegeName?: string
+  mobileNumber?: string
+  yearOfStudy?: string
+  department?: string
+  eventsRegistered: string[]
+  payment?: {
+    eventFeePaid: boolean
+    eventFeeAmount: number
+    workshopsPaid: string[]
+  }
+  workshopsRegistered: string[]
+  workshopPayments: {
+    [workshopId: string]: "PAID" | "NOT_PAID"
+  }
+}
+
 export default function ProfilePage() {
-  const { isLoggedIn, user, login } = useAuth()
+  const { isLoggedIn, user: authUser, login } = useAuth()
   const [copied, setCopied] = useState(false)
+  const [userData, setUserData] = useState<UserData | null>(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    async function fetchUserData() {
+      if (isLoggedIn && authUser) {
+        try {
+          const response = await fetch("/api/user/me")
+          if (response.ok) {
+            const data = await response.json()
+            setUserData(data)
+          }
+        } catch (error) {
+          console.error("Error fetching user data:", error)
+        } finally {
+          setLoading(false)
+        }
+      } else {
+        setLoading(false)
+      }
+    }
+
+    fetchUserData()
+  }, [isLoggedIn, authUser])
 
   const copyTzId = () => {
-    if (user?.tzId) {
-      navigator.clipboard.writeText(user.tzId)
+    if (userData?.tzId) {
+      navigator.clipboard.writeText(userData.tzId)
       setCopied(true)
       setTimeout(() => setCopied(false), 2000)
     }
   }
 
-  if (!isLoggedIn || !user) {
+  if (loading) {
+    return (
+      <main className="relative min-h-screen bg-black overflow-hidden flex items-center justify-center">
+        <FloatingParticles />
+        <div className="text-red-500 font-mono">Loading...</div>
+      </main>
+    )
+  }
+
+  if (!isLoggedIn || !userData) {
     return (
       <main className="relative min-h-screen bg-black overflow-hidden flex items-center justify-center">
         <FloatingParticles />
@@ -41,7 +94,6 @@ export default function ProfilePage() {
 
   return (
     <main className="relative min-h-screen bg-black overflow-hidden">
-      <ProfileAvatar />
       <FloatingParticles />
 
       {/* Atmospheric Background */}
@@ -77,17 +129,34 @@ export default function ProfilePage() {
                   <User className="w-10 h-10 text-red-500" />
                 </div>
                 <div>
-                  <h2 className="text-red-400 font-serif text-xl tracking-wide">{user.name}</h2>
-                  <p className="text-gray-500 text-sm font-mono mt-1">{user.email}</p>
+                  <h2 className="text-red-400 font-serif text-xl tracking-wide">{userData.name}</h2>
+                  <p className="text-gray-500 text-sm font-mono mt-1">{userData.email}</p>
                 </div>
+
+                {userData.collegeName && (
+                  <div className="w-full pt-2 border-t border-red-900/20">
+                    <p className="text-gray-500 text-xs font-mono">{userData.collegeName}</p>
+                    {userData.department && (
+                      <p className="text-gray-600 text-[10px] font-mono mt-1">{userData.department}</p>
+                    )}
+                    {userData.yearOfStudy && (
+                      <p className="text-gray-600 text-[10px] font-mono mt-1">{userData.yearOfStudy}</p>
+                    )}
+                    {userData.mobileNumber && (
+                      <p className="text-gray-600 text-[10px] font-mono mt-1">{userData.mobileNumber}</p>
+                    )}
+                  </div>
+                )}
 
                 <div className="w-full pt-4 border-t border-red-900/30">
                   <p className="text-red-600 font-mono text-[10px] tracking-widest uppercase mb-2">Subject ID</p>
                   <div className="flex items-center justify-between bg-red-950/30 border border-red-900/40 px-3 py-2 rounded-sm group">
-                    <span className="font-mono text-red-400 text-sm tracking-wider">{user.tzId}</span>
-                    <button onClick={copyTzId} className="text-red-500 hover:text-red-400 transition-colors">
-                      {copied ? <CheckCircle className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4" />}
-                    </button>
+                    <span className="font-mono text-red-400 text-sm tracking-wider">{userData.tzId || "Pending"}</span>
+                    {userData.tzId && (
+                      <button onClick={copyTzId} className="text-red-500 hover:text-red-400 transition-colors">
+                        {copied ? <CheckCircle className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4" />}
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>
@@ -104,26 +173,34 @@ export default function ProfilePage() {
               </div>
 
               <div
-                className={`p-4 rounded-sm border ${user.eventsPaymentStatus === "PAID" ? "bg-green-950/10 border-green-900/40" : "bg-red-950/10 border-red-900/40"}`}
+                className={`p-4 rounded-sm border ${userData.payment?.eventFeePaid ? "bg-green-950/10 border-green-900/40" : "bg-red-950/10 border-red-900/40"}`}
               >
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-gray-300 text-sm">Access Pass</span>
                   <div className="flex items-center gap-2">
-                    {user.eventsPaymentStatus === "PAID" ? (
+                    {userData.payment?.eventFeePaid ? (
                       <span className="px-3 py-1 bg-green-900/30 text-green-400 text-xs font-mono rounded-full border border-green-600/40">
                         PAID
                       </span>
                     ) : (
                       <span className="px-3 py-1 bg-red-900/30 text-red-400 text-xs font-mono rounded-full border border-red-600/40">
-                        PENDING
+                        NOT PAID
                       </span>
                     )}
                   </div>
                 </div>
-                <p className="text-gray-500 text-xs italic leading-relaxed">
-                  One-time payment gives access to all 12 intercollegiate symposium events. Please visit the help desk
+                <p className="text-gray-500 text-xs italic leading-relaxed mb-3">
+                  One-time payment (₹{userData.payment?.eventFeeAmount || 200}) gives access to all 12 intercollegiate symposium events. Please visit the help desk
                   if status is pending after payment.
                 </p>
+                {!userData.payment?.eventFeePaid && (
+                  <Link
+                    href="/payment"
+                    className="inline-block mt-2 px-4 py-2 bg-transparent border border-red-600 text-red-500 text-xs font-mono tracking-wider hover:bg-red-600/20 transition-all"
+                  >
+                    PROCEED TO EVENT PAYMENT
+                  </Link>
+                )}
               </div>
             </div>
 
@@ -145,7 +222,7 @@ export default function ProfilePage() {
                       <span className="text-gray-500 text-[10px] uppercase">Advanced Workshop Session</span>
                     </div>
                     <div>
-                      {user.workshopsPaymentStatus[wid] === "PAID" ? (
+                      {userData.workshopPayments?.[wid] === "PAID" ? (
                         <span className="text-green-500 text-xs font-bold font-mono tracking-tighter shadow-sm">
                           ✅ PAID
                         </span>

@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Inter:wght@400;600;700&display=swap');
 @import "tailwindcss";
 @import "tw-animate-css";
 
@@ -75,9 +76,9 @@
 }
 
 @theme inline {
-  --font-sans: "Geist", "Geist Fallback", system-ui, sans-serif;
+  --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif;
   --font-serif: "Cinzel", "Times New Roman", serif;
-  --font-mono: "Geist Mono", "Geist Mono Fallback", monospace;
+  --font-mono: "ui-monospace", SFMono-Regular, Menlo, Monaco, "Roboto Mono", "Noto Mono", monospace;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);

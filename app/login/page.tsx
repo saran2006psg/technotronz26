@@ -1,22 +1,51 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useState } from "react"
+import { useRouter } from "next/navigation"
 import { FloatingParticles } from "@/components/floating-particles"
 
 export default function LoginPage() {
-  const [mounted, setMounted] = useState(false)
-  const [ripple, setRipple] = useState(false)
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
+  const [isLoading, setIsLoading] = useState(false)
+  const [message, setMessage] = useState("")
+  const [isRegister, setIsRegister] = useState(false)
+  const [name, setName] = useState("")
+  const router = useRouter()
 
-  useEffect(() => {
-    setMounted(true)
-  }, [])
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setIsLoading(true)
+    setMessage("")
 
-  const handleGoogleLogin = () => {
-    setRipple(true)
-    setTimeout(() => {
-      setRipple(false)
-      window.location.href = "/about"
-    }, 800)
+    try {
+      const endpoint = isRegister ? "/api/auth/register" : "/api/auth/login"
+      const body = isRegister
+        ? { email, password, name }
+        : { email, password }
+
+      const response = await fetch(endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      })
+
+      const data = await response.json()
+
+      if (response.ok) {
+        if (data.user?.registrationCompleted) {
+          router.push("/events")
+        } else {
+          router.push("/register")
+        }
+      } else {
+        setMessage(data.error || "Authentication failed")
+      }
+    } catch (error) {
+      setMessage("An error occurred. Please try again.")
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (
@@ -24,144 +53,217 @@ export default function LoginPage() {
       {/* Base dark gradient background */}
       <div className="absolute inset-0 bg-gradient-to-b from-black via-[#0a0000] to-[#1a0505]" />
 
-      {/* VHS Noise overlay */}
-      <div className="absolute inset-0 opacity-[0.08] pointer-events-none z-50 animate-grain bg-[url('data:image/svg+xml,%3Csvg%20viewBox%3D%220%200%20200%20200%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cfilter%20id%3D%22noise%22%3E%3CfeTurbulence%20type%3D%22fractalNoise%22%20baseFrequency%3D%220.9%22%20numOctaves%3D%224%22%20stitchTiles%3D%22stitch%22%2F%3E%3C%2Ffilter%3E%3Crect%20width%3D%22100%25%22%20height%3D%22100%25%22%20filter%3D%22url%28%23noise%29%22%2F%3E%3C%2Fsvg%3E')]" />
-
-      {/* Scanlines */}
-      <div className="absolute inset-0 opacity-[0.03] pointer-events-none z-40 bg-[repeating-linear-gradient(0deg,transparent,transparent_2px,rgba(0,0,0,0.3)_2px,rgba(0,0,0,0.3)_4px)]" />
-
-      {/* Fog layers with parallax */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute inset-0 animate-fog-slow opacity-30">
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-red-950/20 to-transparent blur-3xl" />
-        </div>
-        <div className="absolute inset-0 animate-fog-mid opacity-20">
-          <div className="absolute top-1/4 left-0 right-0 h-96 bg-gradient-to-r from-transparent via-red-900/30 to-transparent blur-[100px] transform -skew-y-2" />
-        </div>
-        <div className="absolute inset-0 animate-fog-fast opacity-25">
-          <div className="absolute bottom-0 left-0 right-0 h-80 bg-gradient-to-t from-red-950/40 via-red-950/20 to-transparent blur-2xl" />
-        </div>
-        <div className="absolute inset-0 animate-fog-drift opacity-15">
-          <div className="absolute top-1/2 left-1/4 w-48 h-48 sm:w-72 sm:h-72 md:w-96 md:h-96 bg-red-900/30 rounded-full blur-[80px] sm:blur-[100px] md:blur-[120px]" />
-          <div className="absolute top-1/3 right-1/4 w-40 h-40 sm:w-60 sm:h-60 md:w-80 md:h-80 bg-red-800/20 rounded-full blur-[60px] sm:blur-[80px] md:blur-[100px]" />
-        </div>
+      {/* Fog Layers */}
+      <div className="absolute inset-0 z-0">
+        <div
+          className="absolute inset-0 animate-fog-slow"
+          style={{
+            background: "radial-gradient(ellipse 80% 50% at 20% 80%, rgba(127, 29, 29, 0.3) 0%, transparent 60%)",
+          }}
+        />
+        <div
+          className="absolute inset-0 animate-fog-mid"
+          style={{
+            background: "radial-gradient(ellipse 60% 40% at 80% 20%, rgba(153, 27, 27, 0.25) 0%, transparent 50%)",
+          }}
+        />
+        <div
+          className="absolute inset-0 animate-fog-drift"
+          style={{
+            background: "radial-gradient(ellipse 100% 60% at 50% 100%, rgba(127, 29, 29, 0.35) 0%, transparent 70%)",
+          }}
+        />
       </div>
 
-      {/* Floating particles */}
-      {mounted && <FloatingParticles />}
+      {/* VHS Grain Overlay */}
+      <div
+        className="pointer-events-none fixed inset-0 z-50 opacity-[0.03] animate-grain"
+        style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`,
+          backgroundRepeat: "repeat",
+        }}
+      />
 
-      {/* Vignette effect */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_0%,rgba(0,0,0,0.4)_50%,rgba(0,0,0,0.9)_100%)] pointer-events-none z-30" />
+      {/* Scanline Overlay */}
+      <div
+        className="pointer-events-none fixed inset-0 z-40 opacity-[0.04]"
+        style={{
+          backgroundImage:
+            "repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 0, 0, 0.3) 2px, rgba(0, 0, 0, 0.3) 4px)",
+        }}
+      />
 
-      {/* Login Card */}
-      <div className={`relative z-40 w-full max-w-md mx-4 sm:mx-6 ${mounted ? "animate-card-fade-in" : "opacity-0"}`}>
-        {/* Card ambient glow */}
-        <div className="absolute -inset-4 sm:-inset-8 bg-red-600/20 blur-[40px] sm:blur-[60px] rounded-3xl animate-pulse-slow" />
-        <div className="absolute -inset-2 sm:-inset-4 bg-red-500/10 blur-[20px] sm:blur-[30px] rounded-2xl" />
+      {/* Floating Particles */}
+      <FloatingParticles />
 
-        {/* Card */}
-        <div className="relative rounded-2xl border-2 border-red-500/50 bg-black/80 backdrop-blur-sm p-6 sm:p-8 md:p-10 animate-border-pulse overflow-hidden">
-          {/* Inner glow ring */}
-          <div className="absolute inset-[1px] rounded-2xl border border-red-600/20 pointer-events-none" />
+      {/* Vignette */}
+      <div
+        className="pointer-events-none fixed inset-0 z-30"
+        style={{
+          background:
+            "radial-gradient(ellipse at center, transparent 0%, rgba(0, 0, 0, 0.4) 70%, rgba(0, 0, 0, 0.8) 100%)",
+        }}
+      />
 
-          {/* Ripple effect container */}
-          {ripple && (
-            <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-50 overflow-hidden rounded-2xl">
-              <div className="animate-portal-ripple w-4 h-4 rounded-full bg-red-500/40 border-2 border-red-500" />
-            </div>
-          )}
-
-          {/* Title with glitch effect */}
-          <h1 className="relative text-center mb-4 sm:mb-6">
-            <span
-              className="absolute inset-0 animate-glitch-1 text-2xl sm:text-3xl md:text-4xl font-bold font-serif tracking-[0.1em] sm:tracking-[0.15em] text-red-500 opacity-70 blur-[1px]"
-              aria-hidden="true"
-            >
-              ENTER THE PORTAL
-            </span>
-            <span
-              className="absolute inset-0 animate-glitch-2 text-2xl sm:text-3xl md:text-4xl font-bold font-serif tracking-[0.1em] sm:tracking-[0.15em] text-cyan-500 opacity-50 blur-[1px]"
-              aria-hidden="true"
-            >
-              ENTER THE PORTAL
-            </span>
-            <span className="relative block text-2xl sm:text-3xl md:text-4xl font-bold font-serif tracking-[0.1em] sm:tracking-[0.15em] text-transparent bg-clip-text bg-gradient-to-b from-red-500 via-red-600 to-red-800 animate-flicker drop-shadow-[0_0_15px_rgba(220,38,38,0.8)]">
-              ENTER THE PORTAL
-            </span>
-          </h1>
-
-          {/* Subtitle */}
-          <p className="text-center text-red-200/70 text-sm sm:text-base tracking-wide mb-4 sm:mb-6">
-            Identify yourself to access Technotronz 2025.
-          </p>
-
-          <div className="relative mb-6 sm:mb-8 p-3 sm:p-4 rounded-lg border border-red-500/30 bg-red-950/20">
-            <div className="absolute -inset-[1px] rounded-lg bg-red-500/10 blur-sm pointer-events-none" />
-            <p className="relative text-center text-red-300/90 text-xs sm:text-sm leading-relaxed">
-              PSG Tech students must log in using their official college email ID{" "}
-              <span className="text-red-400 font-semibold">(@psgtech.ac.in)</span> to receive the PSG-only registration
-              fee.
-            </p>
-          </div>
-
-          <button
-            onClick={handleGoogleLogin}
-            className="group relative w-full px-4 py-3 sm:px-6 sm:py-4 text-sm sm:text-base font-bold tracking-[0.15em] sm:tracking-[0.2em] uppercase transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] hover:animate-neon-shake"
-          >
-            {/* Button glow layers - full intensity as primary button */}
-            <span className="absolute inset-0 rounded-lg bg-red-600/40 blur-lg group-hover:bg-red-500/60 transition-all duration-500 animate-pulse-slow" />
-            <span className="absolute inset-0 rounded-lg bg-gradient-to-r from-red-800 via-red-600 to-red-800 opacity-90" />
-            <span className="absolute inset-[2px] rounded-md bg-gradient-to-b from-red-950 via-black to-red-950" />
-
-            {/* Animated border */}
-            <span className="absolute inset-0 rounded-lg border-2 border-red-500 group-hover:border-red-400 transition-colors duration-300 animate-border-pulse" />
-
-            {/* Button content */}
-            <span className="relative z-10 flex items-center justify-center gap-2 sm:gap-3 text-red-100 group-hover:text-white transition-colors duration-300 drop-shadow-[0_0_15px_rgba(220,38,38,0.9)]">
-              {/* Google Icon */}
-              <svg className="w-5 h-5 sm:w-6 sm:h-6" viewBox="0 0 24 24">
-                <path
-                  fill="currentColor"
-                  d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-                />
-                <path
-                  fill="currentColor"
-                  d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-                />
-                <path
-                  fill="currentColor"
-                  d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
-                />
-                <path
-                  fill="currentColor"
-                  d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-                />
-              </svg>
-              <span>Sign In With Google</span>
-            </span>
-          </button>
-
-          <p
-            className="text-center text-xs sm:text-sm mt-6 sm:mt-8 tracking-wide animate-pulse-slow"
+      {/* Main Content */}
+      <div className="relative z-20 w-full max-w-md px-4">
+        {/* Title */}
+        <div className="text-center mb-8">
+          <h1
+            className="font-serif text-3xl sm:text-4xl md:text-5xl font-bold text-red-600 tracking-widest animate-flicker"
             style={{
-              color: "rgba(252, 165, 165, 0.7)",
-              textShadow: "0 0 10px rgba(220, 38, 38, 0.4)",
+              textShadow:
+                "0 0 10px rgba(220, 38, 38, 0.8), 0 0 20px rgba(220, 38, 38, 0.6), 0 0 40px rgba(220, 38, 38, 0.4)",
             }}
           >
-            After signing in with Google, you will be redirected to the About Technotronz page.
+            {isRegister ? "JOIN US" : "ENTER"}
+          </h1>
+          <p className="mt-3 text-xs sm:text-sm tracking-[0.3em] text-red-200/70 uppercase">
+            {isRegister ? "Create your account" : "Sign in to continue"}
           </p>
-
-          {/* Decorative bottom line */}
-          <div className="mt-6 sm:mt-8 flex items-center justify-center gap-2 sm:gap-3">
-            <div className="h-[1px] w-8 sm:w-12 bg-gradient-to-r from-transparent to-red-600/50" />
-            <div className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse shadow-[0_0_10px_rgba(220,38,38,0.8)]" />
-            <div className="h-[1px] w-8 sm:w-12 bg-gradient-to-l from-transparent to-red-600/50" />
+          
+          {/* Glowing Divider */}
+          <div className="flex items-center justify-center mt-4">
+            <div className="relative h-0.5 w-32 sm:w-48 overflow-hidden rounded-full">
+              <div
+                className="absolute inset-0 bg-gradient-to-r from-transparent via-red-600 to-transparent animate-energy-beam"
+                style={{
+                  boxShadow: "0 0 20px rgba(220, 38, 38, 0.8), 0 0 40px rgba(220, 38, 38, 0.4)",
+                }}
+              />
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* Bottom fog gradient */}
-      <div className="absolute bottom-0 left-0 right-0 h-32 sm:h-40 md:h-48 bg-gradient-to-t from-red-950/30 to-transparent pointer-events-none" />
+        {/* Form Card */}
+        <div
+          className="relative bg-black/60 backdrop-blur-md border border-red-900/30 rounded-lg p-6 sm:p-8"
+          style={{
+            boxShadow: "0 0 30px rgba(127, 29, 29, 0.2), inset 0 0 30px rgba(0, 0, 0, 0.5)",
+          }}
+        >
+          {/* Glowing border effect */}
+          <div className="absolute inset-0 rounded-lg border border-red-600/20 animate-border-pulse pointer-events-none" />
+
+          <form onSubmit={handleSubmit} className="space-y-5">
+            {isRegister && (
+              <div>
+                <label className="block text-xs tracking-[0.2em] text-red-200/80 uppercase mb-2">
+                  Name
+                </label>
+                <input
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  required
+                  className="w-full px-4 py-3 bg-black/50 border border-red-900/40 rounded text-red-100 placeholder-red-900/50 focus:outline-none focus:border-red-600/60 focus:ring-1 focus:ring-red-600/30 transition-all text-sm"
+                  placeholder="Your full name"
+                  style={{
+                    boxShadow: "inset 0 2px 10px rgba(0, 0, 0, 0.3)",
+                  }}
+                />
+              </div>
+            )}
+
+            <div>
+              <label className="block text-xs tracking-[0.2em] text-red-200/80 uppercase mb-2">
+                Email
+              </label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                className="w-full px-4 py-3 bg-black/50 border border-red-900/40 rounded text-red-100 placeholder-red-900/50 focus:outline-none focus:border-red-600/60 focus:ring-1 focus:ring-red-600/30 transition-all text-sm"
+                placeholder="you@example.com"
+                style={{
+                  boxShadow: "inset 0 2px 10px rgba(0, 0, 0, 0.3)",
+                }}
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs tracking-[0.2em] text-red-200/80 uppercase mb-2">
+                Password
+              </label>
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                minLength={6}
+                className="w-full px-4 py-3 bg-black/50 border border-red-900/40 rounded text-red-100 placeholder-red-900/50 focus:outline-none focus:border-red-600/60 focus:ring-1 focus:ring-red-600/30 transition-all text-sm"
+                placeholder="••••••••"
+                style={{
+                  boxShadow: "inset 0 2px 10px rgba(0, 0, 0, 0.3)",
+                }}
+              />
+            </div>
+
+            {message && (
+              <div
+                className="p-3 rounded bg-red-950/50 border border-red-800/50 text-red-300 text-sm text-center"
+                style={{
+                  textShadow: "0 0 10px rgba(220, 38, 38, 0.5)",
+                }}
+              >
+                {message}
+              </div>
+            )}
+
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="w-full py-3 px-4 bg-gradient-to-r from-red-900 via-red-700 to-red-900 border border-red-600/50 rounded text-red-100 font-bold tracking-[0.2em] uppercase text-sm hover:from-red-800 hover:via-red-600 hover:to-red-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 animate-flicker"
+              style={{
+                boxShadow: "0 0 20px rgba(220, 38, 38, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1)",
+                textShadow: "0 0 10px rgba(255, 255, 255, 0.5)",
+              }}
+            >
+              {isLoading ? "Loading..." : isRegister ? "Create Account" : "Sign In"}
+            </button>
+          </form>
+
+          {/* Toggle Register/Login */}
+          <div className="mt-6 text-center">
+            <button
+              onClick={() => {
+                setIsRegister(!isRegister)
+                setMessage("")
+              }}
+              className="text-red-400/80 hover:text-red-300 text-xs tracking-[0.15em] uppercase transition-colors"
+              style={{
+                textShadow: "0 0 10px rgba(220, 38, 38, 0.3)",
+              }}
+            >
+              {isRegister
+                ? "Already have an account? Sign in"
+                : "Don't have an account? Register"}
+            </button>
+          </div>
+
+          {!isRegister && (
+            <div className="mt-3 text-center">
+              <button
+                onClick={() => router.push("/forgot-password")}
+                className="text-red-500/60 hover:text-red-400 text-xs tracking-[0.1em] uppercase transition-colors"
+              >
+                Forgot password?
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* Back to Home */}
+        <div className="mt-6 text-center">
+          <button
+            onClick={() => router.push("/")}
+            className="text-red-200/50 hover:text-red-200/80 text-xs tracking-[0.15em] uppercase transition-colors"
+          >
+            ← Back to Home
+          </button>
+        </div>
+      </div>
     </main>
   )
 }

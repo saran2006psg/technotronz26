@@ -83,7 +83,7 @@ export function ProfileDropdown() {
               <div>
                 <p className="text-[10px] font-mono text-gray-500 tracking-[0.2em] mb-2">WORKSHOPS</p>
                 <div className="space-y-1.5">
-                  {Object.entries(user.workshopsPaymentStatus).map(([id, status]) => (
+                  {Object.entries(user.workshopsPaymentStatus || {}).map(([id, status]) => (
                     <div key={id} className="flex justify-between items-center font-mono text-[10px]">
                       <span className="text-gray-400">{id}</span>
                       <span className={status === "PAID" ? "text-green-500" : "text-red-700"}>{status}</span>

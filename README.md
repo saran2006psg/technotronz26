@@ -28,3 +28,32 @@ Continue building your app on:
 2. Deploy your chats from the v0 interface
 3. Changes are automatically pushed to this repository
 4. Vercel deploys the latest version from this repository
+
+## Environment Variables
+
+Create a `.env.local` file in the root directory with the following variables:
+
+### Required Variables
+
+```env
+# MongoDB Connection
+MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/technotronz2026
+
+# NextAuth Configuration
+NEXTAUTH_URL=http://localhost:3000
+NEXTAUTH_SECRET=your-random-secret-here
+
+# Email Server Configuration (SMTP)
+EMAIL_SERVER_HOST=smtp.gmail.com
+EMAIL_SERVER_PORT=587
+EMAIL_SERVER_USER=your-email@gmail.com
+EMAIL_SERVER_PASSWORD=your-app-password
+EMAIL_FROM=noreply@technotronz.com
+```
+
+### Notes
+
+- **NEXTAUTH_SECRET**: Generate a random secret using `openssl rand -base64 32`
+- **EMAIL_SERVER_PASSWORD**: For Gmail, use an App Password (not your regular password)
+- **EMAIL_FROM**: The email address that will appear as the sender
+- For production, update `NEXTAUTH_URL` to your production domain
