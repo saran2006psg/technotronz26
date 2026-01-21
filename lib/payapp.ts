@@ -29,7 +29,7 @@ export function getEventFee(email: string): number {
 
 // PayApp API endpoints (test environment)
 const PAYAPP_ENCRYPT_URL = "https://cms.psgps.edu.in/payappapi_test/PayAppapi/EncryptionPayapp"
-const PAYAPP_DECRYPT_URL = "https://cms.psgps.edu.in/payappapi_test/PayAppapi/DecryptionPayApp"
+const PAYAPP_DECRYPT_URL = "https://cms.psgps.edu.in/payappapi_test/PayAppapi/DecryptionPayapp"  
 const PAYAPP_PAY_URL = "https://cms.psgps.edu.in/payappapi_test/PayAppapi/Pay"
 
 interface PayAppPayload {
@@ -179,6 +179,19 @@ export async function encryptPayApp(data: PayAppPayload): Promise<string> {
 }
 
 /**
+ * URL encode string similar to ASP.NET Server.UrlEncode
+ */
+function serverUrlEncode(str: string): string {
+  return encodeURIComponent(str)
+    .replace(/!/g, '%21')
+    .replace(/'/g, '%27')
+    .replace(/\(/g, '%28')
+    .replace(/\)/g, '%29')
+    .replace(/\*/g, '%2A')
+    .replace(/%20/g, '+')  // ASP.NET uses + for spaces
+}
+
+/**
  * Decrypt payment response using PayApp API
  * MUST be called server-side only
  */
@@ -190,8 +203,15 @@ export async function decryptPayApp(encryptedString: string): Promise<DecryptedR
     throw new Error("PayApp credentials not configured")
   }
 
-  console.log("[PayApp] Decrypting response, length:", encryptedString.length)
-  console.log("[PayApp] Encrypted string (first 100):", encryptedString.substring(0, 100))
+  // CRITICAL: PayApp expects URL-encoded string (like Server.UrlEncode in ASP.NET)
+  // Next.js searchParams.get() auto-decodes the URL, so we need to re-encode it
+  const urlEncodedString = serverUrlEncode(encryptedString.trim())
+
+  console.log("[PayApp] Decrypting response")
+  console.log("[PayApp] Original string (first 50):", encryptedString.substring(0, 50))
+  console.log("[PayApp] URL-encoded string (first 50):", urlEncodedString.substring(0, 50))
+  console.log("[PayApp] Original length:", encryptedString.length)
+  console.log("[PayApp] Encoded length:", urlEncodedString.length)
 
   const response = await fetch(PAYAPP_DECRYPT_URL, {
     method: "POST",
@@ -201,7 +221,7 @@ export async function decryptPayApp(encryptedString: string): Promise<DecryptedR
       "APIClient_secret": clientSecret,
     },
     body: JSON.stringify({
-      Decryptstring: encryptedString,
+      dycryptstring: urlEncodedString,  // Note: API uses 'dycryptstring' (lowercase, typo in their docs)
     }),
   })
 
@@ -214,24 +234,33 @@ export async function decryptPayApp(encryptedString: string): Promise<DecryptedR
   const responseText = await response.text()
   console.log("[PayApp] Decryption raw response:", responseText)
 
-  // PayApp decryption returns a string like: "reg_id&category&txn_id&status"
-  // Parse it into structured data
+  // PayApp returns JSON wrapped in quotes like: "{\r\n  \"reg_id\": \"...\", ...}"
+  // This is a double-encoded JSON string, so we need to parse TWICE
   try {
-    // Try JSON first (some APIs return JSON)
-    const decryptedJson = JSON.parse(responseText)
-    console.log("[PayApp] Decrypted JSON:", decryptedJson)
+    // First parse: removes outer quotes, returns inner JSON as STRING
+    let parsed = JSON.parse(responseText)
+    console.log("[PayApp] After 1st parse, type:", typeof parsed)
+    
+    // CRITICAL: If result is still a string (the inner JSON), parse AGAIN
+    if (typeof parsed === "string") {
+      console.log("[PayApp] Result is string, parsing again...")
+      parsed = JSON.parse(parsed)
+    }
+    
+    console.log("[PayApp] ✓ Final decrypted object:", JSON.stringify(parsed))
     
     return {
-      reg_id: decryptedJson.reg_id || "",
-      txn_id: decryptedJson.txn_id || "",
-      category: decryptedJson.category || "",
-      txnstatus: decryptedJson.txnstatus || decryptedJson.status || "0",
-      paycatg_id: decryptedJson.paycatg_id ? parseInt(decryptedJson.paycatg_id) : undefined,
+      reg_id: parsed.reg_id || "",
+      txn_id: parsed.txn_id || "",
+      category: parsed.category || "",
+      txnstatus: parsed.txnstatus || parsed.status || "0",
+      paycatg_id: parsed.paycatg_id ? parseInt(parsed.paycatg_id) : undefined,
     }
-  } catch {
-    // Not JSON, parse as delimited string: "reg_id&category&txn_id&status"
+  } catch (error) {
+    console.error("[PayApp] JSON parse error:", error)
+    // Fallback: parse as delimited string: "reg_id&category&txn_id&status"
     const parts = responseText.split("&")
-    console.log("[PayApp] Decrypted string parts:", parts)
+    console.log("[PayApp] Fallback - Decrypted string parts:", parts)
     
     return {
       reg_id: parts[0] || "",

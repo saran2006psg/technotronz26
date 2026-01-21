@@ -40,8 +40,14 @@ async function handleVerification(encryptedString: string | null) {
       return NextResponse.redirect(`${baseUrl}/payment/success?txn_id=${payment.txn_id}`)
     }
 
+    // Debug: Log the exact txnstatus value and type
+    console.log("Payment verify - txnstatus value:", decrypted.txnstatus)
+    console.log("Payment verify - txnstatus type:", typeof decrypted.txnstatus)
+    console.log("Payment verify - txnstatus === '1':", decrypted.txnstatus === "1")
+    console.log("Payment verify - txnstatus == 1:", decrypted.txnstatus == "1")
+
     // Check if payment was successful (txnstatus "1" = success)
-    if (decrypted.txnstatus === "1") {
+    if (decrypted.txnstatus === "1" || decrypted.txnstatus === 1) {
       // Update payment status
       payment.status = "SUCCESS"
       await payment.save()
