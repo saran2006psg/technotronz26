@@ -19,6 +19,8 @@ interface EventDetailsClientProps {
     dateTime: string;
     rules: string[];
     coordinators: { name: string; phone: string }[];
+    domains?: string[];
+    generalInstructions?: string[];
   };
 }
 
@@ -28,6 +30,8 @@ const EventDetailsClient: React.FC<EventDetailsClientProps> = ({ eventId, event,
   const { toast } = useToast()
   const [isRegistering, setIsRegistering] = useState(false)
   const [isRegistered, setIsRegistered] = useState(initialIsRegistered)
+  const [isPaying, setIsPaying] = useState(false)
+  const [showPayNow, setShowPayNow] = useState(false)
 
   const handleRegister = async () => {
     setIsRegistering(true)
@@ -51,6 +55,8 @@ const EventDetailsClient: React.FC<EventDetailsClientProps> = ({ eventId, event,
 
       // Update local state and refresh page
       setIsRegistered(true)
+      // Show Pay Now button for events (workshops handle payment elsewhere)
+      if (!isWorkshop) setShowPayNow(true)
       router.refresh()
       toast({
         variant: "success",
@@ -68,6 +74,37 @@ const EventDetailsClient: React.FC<EventDetailsClientProps> = ({ eventId, event,
       setIsRegistering(false)
     }
   };
+
+  const handlePayment = async () => {
+    setIsPaying(true)
+    try {
+      const response = await fetch("/api/payment/create", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type: "EVENT" }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        toast({ variant: "destructive", title: "Payment Error", description: data.error || "Failed to initiate payment" })
+        setIsPaying(false)
+        return
+      }
+
+      if (data.redirectUrl) {
+        window.location.href = data.redirectUrl
+        return
+      }
+
+      toast({ variant: "destructive", title: "Payment Error", description: "Payment initialization failed. Please try again." })
+      setIsPaying(false)
+    } catch (error) {
+      console.error("Payment error:", error)
+      toast({ variant: "destructive", title: "Error", description: "An error occurred. Please try again." })
+      setIsPaying(false)
+    }
+  }
 
   return (
     <main className="relative min-h-screen overflow-hidden">
@@ -198,6 +235,30 @@ const EventDetailsClient: React.FC<EventDetailsClientProps> = ({ eventId, event,
                         <span>
                           <span className="text-red-400">{round.name}:</span> {round.description}
                         </span>
+                      </li>
+                    ))}
+                  </ul>
+                </section>
+              )}
+
+              {/* Domains Section */}
+              {!isWorkshop && event.domains && event.domains.length > 0 && (
+                <section
+                  className="animate-content-fade-in opacity-0"
+                  style={{ animationDelay: "0.4s", animationFillMode: "forwards" }}
+                >
+                  <h3 className="font-serif text-lg sm:text-xl text-red-500 tracking-wider mb-3 animate-flicker hover:animate-glitch-1 transition-all cursor-default">
+                    DOMAINS
+                  </h3>
+                  <ul className="space-y-2">
+                    {event.domains.map((domain, i) => (
+                      <li
+                        key={i}
+                        className="text-gray-400 text-sm sm:text-base flex items-start gap-2 animate-list-item-fade opacity-0"
+                        style={{ animationDelay: `${0.45 + i * 0.08}s`, animationFillMode: "forwards" }}
+                      >
+                        <span className="text-red-600 mt-1">•</span>
+                        <span>{domain}</span>
                       </li>
                     ))}
                   </ul>
@@ -336,30 +397,68 @@ const EventDetailsClient: React.FC<EventDetailsClientProps> = ({ eventId, event,
                 </ul>
               </section>
 
-              {/* Register Button */}
+              {/* Register / Pay Now Button */}
               <div
                 className="pt-4 sm:pt-6 text-center animate-content-fade-in opacity-0"
                 style={{ animationDelay: "1s", animationFillMode: "forwards" }}
               >
-                <button
-                  onClick={handleRegister}
-                  disabled={isRegistering || isRegistered}
-                  className={`group relative inline-flex items-center justify-center px-8 sm:px-12 py-3 sm:py-4 bg-transparent border-2 font-serif text-base sm:text-lg tracking-[0.15em] overflow-hidden transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed ${
-                    isRegistered 
-                      ? 'border-green-600 text-green-500' 
-                      : 'border-red-600 text-red-500 hover:text-red-300 hover:border-red-500 hover:shadow-[0_0_40px_rgba(220,38,38,0.7)] animate-border-pulse'
-                  }`}
-                >
-                  <span className="absolute inset-0 flex items-center justify-center">
-                    <span className="absolute w-2 h-2 bg-red-600/50 rounded-full opacity-0 group-hover:animate-portal-ripple" />
-                  </span>
-                  <span className={`absolute inset-0 transition-all duration-300 ${
-                    isRegistered ? 'bg-green-600/10' : 'bg-red-600/0 group-hover:bg-red-600/20'
-                  }`} />
-                  <span className="relative z-10 group-hover:animate-button-glitch">
-                    {isRegistering ? "REGISTERING..." : isRegistered ? "✓ REGISTERED" : "REGISTER NOW →"}
-                  </span>
-                </button>
+                {/* If this is a workshop use existing flow (handled elsewhere) */}
+                {isWorkshop ? (
+                  <button
+                    onClick={handleRegister}
+                    disabled={isRegistering || isRegistered}
+                    className={`group relative inline-flex items-center justify-center px-8 sm:px-12 py-3 sm:py-4 bg-transparent border-2 font-serif text-base sm:text-lg tracking-[0.15em] overflow-hidden transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed ${
+                      isRegistered 
+                        ? 'border-green-600 text-green-500' 
+                        : 'border-red-600 text-red-500 hover:text-red-300 hover:border-red-500 hover:shadow-[0_0_40px_rgba(220,38,38,0.7)] animate-border-pulse'
+                    }`}
+                  >
+                    <span className="absolute inset-0 flex items-center justify-center">
+                      <span className="absolute w-2 h-2 bg-red-600/50 rounded-full opacity-0 group-hover:animate-portal-ripple" />
+                    </span>
+                    <span className={`absolute inset-0 transition-all duration-300 ${
+                      isRegistered ? 'bg-green-600/10' : 'bg-red-600/0 group-hover:bg-red-600/20'
+                    }`} />
+                    <span className="relative z-10 group-hover:animate-button-glitch">
+                      {isRegistering ? "REGISTERING..." : isRegistered ? "✓ REGISTERED" : "REGISTER NOW →"}
+                    </span>
+                  </button>
+                ) : (
+                  // For events: when registered show PAY NOW; otherwise show register button
+                  showPayNow && isRegistered ? (
+                    <button
+                      onClick={handlePayment}
+                      disabled={isPaying}
+                      className="relative inline-block px-8 sm:px-12 py-3 sm:py-4 bg-transparent border-2 border-yellow-600 text-yellow-500 text-sm sm:text-base font-mono tracking-widest overflow-hidden transition-all duration-300 hover:bg-yellow-600/20 hover:text-yellow-400 hover:shadow-[0_0_30px_rgba(234,179,8,0.6)] group animate-pulse-glow-subtle disabled:opacity-50 disabled:cursor-not-allowed"
+                      style={{ boxShadow: "0 0 20px rgba(234, 179, 8, 0.4), inset 0 0 20px rgba(234, 179, 8, 0.1)" }}
+                    >
+                      <span className="relative z-10 group-hover:animate-glitch-1">
+                        {isPaying ? "PROCESSING..." : "PAY NOW"}
+                      </span>
+                      <div className="absolute inset-0 bg-yellow-600/10 scale-0 group-hover:scale-100 transition-transform duration-500 rounded-sm" />
+                    </button>
+                  ) : (
+                    <button
+                      onClick={handleRegister}
+                      disabled={isRegistering || isRegistered}
+                      className={`group relative inline-flex items-center justify-center px-8 sm:px-12 py-3 sm:py-4 bg-transparent border-2 font-serif text-base sm:text-lg tracking-[0.15em] overflow-hidden transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed ${
+                        isRegistered 
+                          ? 'border-green-600 text-green-500' 
+                          : 'border-red-600 text-red-500 hover:text-red-300 hover:border-red-500 hover:shadow-[0_0_40px_rgba(220,38,38,0.7)] animate-border-pulse'
+                      }`}
+                    >
+                      <span className="absolute inset-0 flex items-center justify-center">
+                        <span className="absolute w-2 h-2 bg-red-600/50 rounded-full opacity-0 group-hover:animate-portal-ripple" />
+                      </span>
+                      <span className={`absolute inset-0 transition-all duration-300 ${
+                        isRegistered ? 'bg-green-600/10' : 'bg-red-600/0 group-hover:bg-red-600/20'
+                      }`} />
+                      <span className="relative z-10 group-hover:animate-button-glitch">
+                        {isRegistering ? "REGISTERING..." : isRegistered ? "✓ REGISTERED" : "REGISTER NOW →"}
+                      </span>
+                    </button>
+                  )
+                )}
               </div>
             </div>
           </div>

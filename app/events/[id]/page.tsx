@@ -21,6 +21,9 @@ const eventData: Record<
     coordinators: { name: string; phone: string }[]
     fileCode: string
     mode?: string
+    domains?: string[]
+    generalInstructions?: string[]
+    topics?: string[]
   }
 > = {
   "workshop-1": {
@@ -62,7 +65,7 @@ const eventData: Record<
 
 
   hackathon: {
-    title: "HACKATHON : HACKZEN",
+    title: "HACKZEN",
     description: [
       "Hackzen is an innovation-driven hackathon that encourages participants to collaboratively design solutions for real-world challenges within a limited time. The event promotes creativity, feasibility, and rapid development while allowing teams to explore diverse technology and application domains. It serves as a platform for transforming ideas into impactful solutions through structured evaluation and hands-on prototyping."
     ],
@@ -70,17 +73,41 @@ const eventData: Record<
     dateTime: "07/02/2026\n9:30 am - 3:30 pm",
     rules: [
       "Participation : Team of  2 - 4 members",
-      "Entry fee : General fee (Rs.250 for non-PSG Tech and Rs.200 for PSG Tech)",
-      "Contact info : Rohini - +91 88386 19825, Sunil  Sanjay - +91 93600 41571",
       "Submission mail id : technotronz26hackiete@gmail.com",
-      "Abstract submission deadline : 01/02/2026"
+      "Abstract submission deadline : 01/02/2026",
+      "Teams must submit the presentation of their proposed solution on or before the specified deadline for shortlisting",
+      "Selected teams should bring their working prototype on the event day",
+      "Shortlisted teams for Round 2 must present and demonstrate their prototype during evaluation",
+      "All submissions must be original; plagiarism or use of pre-built solutions is strictly prohibited",
+      "Teams should be prepared to clearly explain the problem statement, solution approach, and technical implementation"
     ],
     coordinators: [
       { name: "Rohini", phone: "+91 88386 19825" },
       { name: "Sunil  Sanjay", phone: "+91 93600 41571" }
     ],
-    EntryFee: "PSG: Rs.200, Non-PSG: Rs.250",
-    fileCode: "FILE-003"
+    EntryFee: "General fee (Rs.250 for non-PSG Tech and Rs.200 for PSG Tech)",
+    fileCode: "FILE-003",
+    rounds: [
+      {
+        name: "Round 1 : IdeaXone",
+        description: `IdeaXone is the ideation and proposal phase in which teams select a domain and identify a meaningful problem within it. Participants present a clear problem statement along with an innovative solution, explaining their approach, technology stack, feasibility, and potential impact. Abstracts must be submitted before the deadline, after which teams will be shortlisted to present in this round. Each team will be allotted 7 minutes to present their ideas. This round emphasizes originality, clarity of thought, and effective communication, with the most promising teams advancing to the next stage.`
+      },
+      {
+        name: "Round 2 : BuildVerse",
+        description: `BuildVerse challenges shortlisted teams to bring their ideas to life through working prototypes. Participants demonstrate the functionality of their solution, explain design and development decisions, and showcase how the prototype addresses the identified problem within a duration of 7-mins. Evaluation is based on technical depth, practicality, usability, and execution quality.`
+      }
+    ],
+    domains: [
+      "Artificial Intelligence & Machine Learning",
+      "Internet of Things (IoT)",
+      "Signal Processing",
+      "Embedded Systems",
+      "Robotics and Automation",
+      "Healthcare & MedTech",
+      "Agriculture Technology (AgriTech)",
+      "Smart Cities"
+    ],
+   
   },
   codeathon: {
     title: "CODEATHON",
@@ -98,7 +125,7 @@ const eventData: Record<
       { name: "Kavinaya", phone: "+91 90251 47460" },
       { name: "Prahalya", phone: "+91 93451 32434" }
     ],
-    EntryFee: "PSG: Rs.200, Non-PSG: Rs.250",
+    EntryFee: "General fee (Rs.250 for non-PSG Tech and Rs.200 for PSG Tech)",
     fileCode: "FILE-004",
     rounds: [
       {
@@ -112,7 +139,7 @@ const eventData: Record<
     ]
   },
   "bot-lf": {
-    title: "BOT EVENT 1 : PATHTRONIX",
+    title: "PATHTRONIX",
     description: [
       "PathTronix is an exciting Line Following Robot Challenge that invites participants to design and program autonomous robots capable of navigating a predefined track using intelligent line-following techniques. The event unfolds across multiple rounds, each testing precision, speed, adaptability, and control. From sharp curves and intersections to ramps and obstacles, teams must showcase robust design and smart.",
 
@@ -146,11 +173,11 @@ const eventData: Record<
       { name: "Jayasri Rani S", phone: "+91 93607 37144" },
       { name: "Pavithran S Y", phone: "+91 93456 93986" }
     ],
-    EntryFee: "PSG: Rs.200, Non-PSG: Rs.250(General Registration Fee)",
+    EntryFee: "General fee (Rs.250 for non-PSG Tech and Rs.200 for PSG Tech)",
     fileCode: "FILE-005"
   },
   "bot-ba": {
-    title: "BOT EVENT 2 : BOT BATTLE ARENA",
+    title: "BOT BATTLE ARENA",
     description: [
       "Bot Battle Arena is a high-intensity combat robotics event where teams design and build manually controlled robots to compete inside a circular arena. The objective is to outmaneuver, push, lift, or force the opponent robot beyond the arena boundary. This event emphasizes mechanical strength, stability, and strategic thinking offering an adrenaline-filled experience for robotics enthusiasts.",
     ],
@@ -195,7 +222,7 @@ const eventData: Record<
       { name: "Murali", phone: "+91 93426 28687" },
       { name: "Varalakshmi", phone: "+91 90426 76481" }
     ],
-    EntryFee: "General fee(PSG: Rs.200, Non-PSG: Rs.250)",
+    EntryFee: "General fee (Rs.250 for non-PSG Tech and Rs.200 for PSG Tech)",
     fileCode: "FILE-006"
   },
   "design-event": {
@@ -204,7 +231,7 @@ const eventData: Record<
       "PixForge is a creative design competition that celebrates visual storytelling, originality, and digital design skills. The event encourages participants to communicate strong social and environmental messages through impactful poster designs using professional design tools. It provides a platform for designers to showcase creativity, technical proficiency, and attention to detail under time constraints."
     ],
     mode: "Offline",
-    dateTime: "08/02/2026\n9:00 am - 12:00 pm",
+    dateTime: "07/02/2026\n1:30 pm - 4:30 pm",
     rules: [
       "Theme must strictly follow the given topics",
       "Poster size must be A4 vertical format",
@@ -225,12 +252,12 @@ const eventData: Record<
       { name: "Meiyarasan", phone: "+91 70107 00186" },
       { name: "Sam", phone: "+91 93615 51878" }
     ],
-    EntryFee: "PSG: Rs.200, Non-PSG: Rs.250",
+    EntryFee: "General fee (Rs.250 for non-PSG Tech and Rs.200 for PSG Tech)",
     fileCode: "FILE-007",
     rounds: [
       {
         name: "Round 1 : Sketchmorph",
-        description: "Sketchmorph focuses on original poster creation based on the given theme. Participants are required to design a visually compelling poster using Adobe Photoshop, emphasizing creativity, composition, typography, color harmony, and message clarity. The round evaluates how effectively participants translate ideas into meaningful visual communication."
+        description: "Sketchmorph focuses on original poster creation based on the given theme. Participants are required to design a visually compelling poster using Adobe Photoshop or Canva, emphasizing creativity, composition, typography, color harmony, and message clarity. The round evaluates how effectively participants translate ideas into meaningful visual communication."
       },
       {
         name: "Round 2 : Framefix",
@@ -248,9 +275,8 @@ const eventData: Record<
       { name: "Round 2-Rapidex", description: "Rapidex takes the competition to the next level, with 6 teams for a 1-hour intellectual battle. Teams collaborate to answer a curated selection of challenging questions, with answers presented audibly. The team with the highest score at the end of this round is crowned the winner, concluding the thrilling contest." },
     ],
       // removed stray rounds
-    dateTime: "February 7, 2026 — 9:00 AM to 12:00 PM",
+    dateTime: "February 7, 2026 — 9:30 AM to 12:30 PM",
     rules: [
-           "Entry fee : Rs.500"
     ],
     coordinators: [
       { name: "Subhasurya", phone: "+91 9566400624" },
@@ -258,26 +284,26 @@ const eventData: Record<
     ],
       // removed stray EntryFee
     fileCode: "FILE-009",
-    EntryFee: "PSG: Rs.200, Non-PSG: Rs.250",
+    EntryFee: "General fee (Rs.250 for non-PSG Tech and Rs.200 for PSG Tech)",
   },
   "non-tech-1": {
-    title: "NON TECH 1-FINESCAPE",
+    title: "FINESCAPE",
     description: [
       "FinEscape is an escape-room–style analytical challenge that tests participants’ logic, observation, and problem-solving skills under time pressure. Competing in teams of two, participants progress through a series of interconnected checkpoints, each unlocking clues essential for advancing further. The event blends visual reasoning, numerical analysis, pattern recognition, and strategic thinking, ensuring a dynamic and engaging experience. Every stage builds on previously discovered information, demanding accuracy, teamwork, and quick decision-making. With a mix of puzzles, data interpretation, and creative logic, FinEscape offers an immersive non-technical challenge where only the most focused and analytical teams succeed in uncovering the final escape code."
     ],
     rounds: [],
     mode: "Offline",
-    dateTime: "February 7, 2026 - 9:00 AM to 12:00 PM",
+    dateTime: "February 7, 2026 - 9:30 AM to 12:30 PM",
     rules: ["Team size: 2 members"],
     coordinators: [
-      { name: "Subhasurya", phone: "+91 9566400624" },
-      { name: "Vaishnavi", phone: "+91 7418703425" }
+      { name: "Roshan", phone: "+91 9345847502" },
+      { name: "Gopika", phone: "+91 9042790305" }
     ],
-    EntryFee: "PSG: Rs.200, Non-PSG: Rs.250",
+    EntryFee: "General fee (Rs.250 for non-PSG Tech and Rs.200 for PSG Tech)",
     fileCode: "FILE-010"
   },
   "non-tech-2": {
-    title: "NON TECH 2-EQUINOX",
+    title: "EQUINOX",
     description: [
       "Equinox is a dynamic non-technical team event that focuses on balance, coordination, and teamwork. It challenges participants through a mix of fast-paced activities and strategic duo tasks. Teams must adapt quickly, communicate effectively, and stay synchronized under time pressure. Each round tests different skills including memory, precision, logic, and trust. Equinox delivers an engaging and energetic experience where collaboration leads to victory.",
     ],
@@ -286,17 +312,17 @@ const eventData: Record<
       { name: "Round 2-Twin Tactix Arena", description: "Twin Tactix Arena intensifies the competition with a set of paired challenges designed exclusively for two-member teams. Each task focuses on communication, trust, synchronization, and quick decision-making under pressure. Teams must rely heavily on verbal cues and mutual understanding to succeed. Accuracy, timing, and teamwork play a crucial role in scoring." },
     ],
     mode: "Offline",
-    dateTime: "February 7, 2026 - 9:00 AM to 12:00 PM",
+    dateTime: "February 7, 2026 - 1:30 PM to 4:30 PM",
     rules: ["Team size: 2 members"],
     coordinators: [
       { name: "Jayasri Rani S", phone: "+91 9360737144" },
       { name: " Prakalya", phone: "+91 9092544666" },
     ],
-    EntryFee: "PSG: Rs.200, Non-PSG: Rs.250",
+    EntryFee: "General fee (Rs.250 for non-PSG Tech and Rs.200 for PSG Tech)",
     fileCode: "FILE-011",
   },
   tech: {
-    title: "TECH-AMPERON",
+    title: "AMPERON",
     description: [
       "Amperon is a technical event that immerses participants in a high-energy problem-solving scenario inspired by power grid failures and electronic instability. Teams step into the role of trainees tasked with diagnosing abnormal electrical behavior, analyzing logical inconsistencies, and restoring system stability. The event focuses on core electronics concepts making it an engaging challenge for students passionate about circuits and analytical thinking."
     ],
@@ -305,10 +331,9 @@ const eventData: Record<
       { name: "Round 2-Energen", description: "Energen represents the recovery phase where teams are given a partially faulty circuit that simulates a damaged power node. Participants must carefully inspect the circuit, identify faults, and determine the components required for repair. Components are earned by solving logic, aptitude, and electronics-based tasks. Once acquired, teams must repair the circuit within the given time, ensuring correct polarity, steady output, and safe operation." }
     ],
     mode: "Offline",
-    dateTime: "February 8, 2026 — 9:00 AM to 12:00 PM",
+    dateTime: "February 8, 2026 — 9:30 AM to 12:30 PM",
     rules: [
       "Team size: 2 members",
-      "Entry fee : Rs.500"
     ],
     coordinators: [
       { name: "P. U. Jagadhish Kumaar", phone: "+91 9952513520" },
@@ -320,18 +345,17 @@ const eventData: Record<
   flagship: {
     title: "FLAGSHIP-FF ARENA",
     description: [
-      "The ultimate event. Face the Demogorgon of all challenges and emerge victorious.",
-      "Every skill you possess will be tested in this legendary competition.",
-      // removed stray EntryFee
+      "FF Arena is a competitive Free Fire gaming event designed to test players’ teamwork, strategy,tactical decision-making, and survival skills. The event progresses through structured rounds,moving from intense squad-based combat to large-scale Battle Royale gameplay to determine the ultimate champion.",
+   
     ],
     rounds: [
       { name: "Round 1: Alphazone (Clash Squad – Eliminator Format)", description: "Round 1 is conducted in Clash Squad mode with teams competing in head-to-head matches. Each match follows a Best of 7 rounds format, where the first team to secure 4 wins is declared the winner. Every team plays only one match, and the total match completion time is recorded. This round emphasizes tactical coordination, communication, role-based gameplay, and efficiency. Qualification for the next round is decided based on match results and completion time, as determined by the organizers." },
       { name: "Round 2: Metazone (Battle Royale Mode)", description: "Round 2 is the final stage of the event, where qualified teams compete simultaneously in a Squad Battle Royale match. The shrinking safe zone forces intense engagements and strategic positioning. Teams are evaluated based on survival, adaptability, coordination, and combat performance. Final rankings are calculated using a points system that combines placement points and kill points. The team with the highest total score is crowned the winner." },
-      { name: "Round 3", description: "Grand Finale - Legend is born" },
+
     ],
     mode: "Offline",
-    dateTime: "February 2, 2026 - 9:00 AM to 12:00 PM",
-    EntryFee: "PSG: Rs.200, Non-PSG: Rs.250",
+    dateTime: "February 8, 2026 — 9:30 AM to 12:30 PM",
+    EntryFee: "General fee (Rs.250 for non-PSG Tech and Rs.200 for PSG Tech)",
     rules: [
       "Each team must consist of exactly 4 registered players",
       "No mid-match substitutions are allowed",
@@ -362,8 +386,6 @@ const eventData: Record<
     dateTime: "07/02/2026\n9:30 am - 12:30 pm",
     rules: [
       "Participation : Individual / Team of maximum 4 members",
-      "Entry fee : General fee (Rs.250 for non-PSG Tech and Rs.200 for PSG Tech)",
-      "Contact info : P. U. Jagadhish Kumaar - +91 99525 13520, Vishal - +91 85239 44845",
       "Submission mail id : technotronz26pp1iete@gmail.com",
       "Abstract submission deadline : 01/02/2026"
     ],
@@ -371,8 +393,20 @@ const eventData: Record<
       { name: "P. U. Jagadhish Kumaar", phone: "+91 99525 13520" },
       { name: "Vishal", phone: "+91 85239 44845" },
     ],
-    EntryFee: "PSG: Rs.200, Non-PSG: Rs.250",
+    EntryFee: "General fee (Rs.250 for non-PSG Tech and Rs.200 for PSG Tech)",
     fileCode: "FILE-014",
+    topics: [
+      "SignalSphere – Advancements in Long-Range Wireless Communication for Smarter Connectivity",
+      "EtherLink Networks – Next-Generation Communication Protocols Enhancing Low-Power IoT Systems",
+      "AeroComm Dynamics – Wireless Sensor Networks for Reliable Environmental Monitoring",
+      "EmbedX Dynamics – Real-Time Embedded Architectures for Intelligent Control Systems",
+      "ControlMatrix – Adaptive Embedded Control for Automation and Smart Devices",
+      "GreenCircuit Solutions – Low-Power Electronic Design for Sustainable Technology",
+      "IoT Nexus – Cloud-Connected IoT Platforms for Smarter Urban Innovations",
+      "EcoSense Networks – IoT-Enabled Smart Monitoring for Environmental Conservation",
+      "RenewEdge Systems – Embedded and IoT Approaches for Enhancing Renewable Energy Applications",
+      "SustainGrid – Smart Energy Management Using Sensor Networks and Automation"
+    ],
     // removed topics property
   },
   "paper-presentation-2": {
@@ -389,17 +423,26 @@ const eventData: Record<
     dateTime: "07/02/2026\n1:30 pm - 4:30 pm",
     rules: [
       "Participation : Individual / Team of maximum 4 members",
-      "Entry fee : General fee (Rs.250 for non-PSG Tech and Rs.200 for PSG Tech)",
-      "Contact info : Rohini - +91 88386 19825, Lijith - +91 63821 45569",
-      "Submission mail id : technotronz26pp2iete@gmail.com",
       "Abstract submission deadline : 01/02/2026"
     ],
     coordinators: [
       { name: "Rohini", phone: "+91 88386 19825" },
       { name: "Lijith", phone: "+91 63821 45569" },
     ],
-    EntryFee: "PSG: Rs.200, Non-PSG: Rs.250",
+    EntryFee: "General fee (Rs.250 for non-PSG Tech and Rs.200 for PSG Tech)",
     fileCode: "FILE-015",
+    topics: [
+      "Artificial Intelligence – Basics and Real-World Applications",
+      "Machine Learning – Algorithms and Practical Applications",
+      "Cyber Security – Threats, Attacks, and Protection Techniques",
+      "Cloud Computing – Architecture and Service Models (IaaS, PaaS, SaaS)",
+      "Blockchain Technology – Secure and Decentralized Digital Systems",
+      "VLSI Design Flow – From Specification to Fabrication",
+      "5G Technology – Architecture, Features, and Applications",
+      "Internet of Things (IoT) – Architecture and Smart Applications",
+      "Sensors and Actuators – Core Building Blocks of Robotic Systems",
+      "PID Control Systems – Control of Mobile and Autonomous Robots"
+    ],
     // removed topics property
   }
 }

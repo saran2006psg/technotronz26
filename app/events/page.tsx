@@ -41,7 +41,7 @@ const otherEvents = [
 	},
 	{
 		id: "hackathon",
-		title: "Hackathon",
+		title: "Project Presentation",
 		description: "48 hours in the Upside Down. Build or be consumed by the void.",
 		label: "003",
 	},
